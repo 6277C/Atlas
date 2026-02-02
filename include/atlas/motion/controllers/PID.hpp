@@ -8,13 +8,15 @@ public:
   float kD = 0;
   float antiWindup = 0;
 
-  PID(float kP, float kI, float kD, float antiWindup, bool signFlipReset = false);
+  PID(float kP, float kI, float kD, float antiWindup, bool signFlipReset = true);
 
   float compute(float error);
 
   void setSignFlipReset(bool signFlipReset);
 
   bool getSignFlipReset();
+
+  void reset();
 
 private:
   float error = 0;

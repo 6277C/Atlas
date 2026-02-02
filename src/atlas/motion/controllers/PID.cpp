@@ -1,4 +1,4 @@
-#include "atlas/motion/PID.hpp"
+#include "atlas/motion/controllers/PID.hpp"
 #include "atlas/util.hpp"
 #include "pros/rtos.hpp"
 #include <cmath>
@@ -31,7 +31,12 @@ float PID::compute(float error) {
   return error * kP + integral * kI + derivative * kD;
 }
 
-void atlas::PID::setSignFlipReset(bool signFlipReset) { signFlipReset = signFlipReset; }
+void PID::setSignFlipReset(bool signFlipReset) { signFlipReset = signFlipReset; }
 
-bool atlas::PID::getSignFlipReset() { return signFlipReset; }
+bool PID::getSignFlipReset() { return signFlipReset; }
+
+void PID::reset(){
+  integral = 0;
+  prevError = 0;
+}
 } // namespace atlas

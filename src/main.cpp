@@ -2,6 +2,7 @@
 #include "atlas/atlas.hpp" // IWYU pragma: keep
 #include "atlas/config/chassis.hpp"
 #include "atlas/config/opcurve.hpp"
+#include "atlas/localization/odom/odom.hpp"
 #include "pros/llemu.hpp"
 
 pros::MotorGroup leftMotors({-5, 4, -3},
@@ -38,8 +39,6 @@ atlas::ExpoDriveCurve throttleCurve(3, // joystick deadband out of 127
 );
 
 atlas::Chassis chassis(drivetrain, sensors, nullptr, nullptr);
-
-
 /**
  * Runs initialization code. This occurs as soon as the program is started.
  *
@@ -48,6 +47,7 @@ atlas::Chassis chassis(drivetrain, sensors, nullptr, nullptr);
  */
 void initialize() {
 	pros::lcd::initialize();
+    chassis.calibrate();
 }
 
 

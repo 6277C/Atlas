@@ -1,4 +1,4 @@
-#include "atlas/motion/exitConditions.hpp"
+#include "atlas/motion/controllers/exitConditions.hpp"
 namespace atlas {
 
 bool ExitConditions::isSettled() {

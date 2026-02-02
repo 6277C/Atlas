@@ -62,6 +62,5 @@ class OdomSensors{
         TrackingWheel* horizontal1;
         TrackingWheel* horizontal2;
         pros::Imu* imu;
-
 };
 }
