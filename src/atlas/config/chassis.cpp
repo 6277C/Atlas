@@ -1,13 +1,38 @@
 #include "atlas/config/chassis.hpp"
-#include "atlas/config/drivetrain.hpp"
-#include "atlas/config/opcurve.hpp"
-#include "atlas/localization/odom/odom.hpp"
+#include "atlas/util.hpp"
+#include "pros/motor_group.hpp"
 #include <math.h>
 
 namespace atlas {
-Chassis::Chassis(Drivetrain drivetrain, OdomSensors sensors, DriveCurve *throttleCurve, DriveCurve *steerCurve)
+/**
+* Drivetrain Contructor
+* Used in the chassis struct
+*/
+atlas::Drivetrain::Drivetrain(pros::MotorGroup *leftMotors, pros::MotorGroup *rightMotors, float trackWidth,
+                              float wheelDiameter, float rpm, float horizontalDrift)
+    : leftMotors(leftMotors), rightMotors(rightMotors), trackWidth(trackWidth), wheelDiameter(wheelDiameter), rpm(rpm),
+      horizontalDrift(horizontalDrift) {}
+
+
+ExpoOPCurve::ExpoOPCurve(float deadband, float minOutput, float curve)
+    : deadband(deadband), minOutput(minOutput), curveGain(curve) {}
+
+float ExpoOPCurve::curve(float input) {
+  // return 0 if input is within deadzone
+  if (fabs(input) <= deadband)
+    return 0;
+  // g is the output of g(x) as defined in the Desmos graph
+  const float g = fabs(input) - deadband;
+  // g127 is the output of g(127) as defined in the Desmos graph
+  const float g127 = 127 - deadband;
+  // i is the output of i(x) as defined in the Desmos graph
+  const float i = pow(curveGain, g - 127) * g * sgn(input);
+  // i127 is the output of i(127) as defined in the Desmos graph
+  const float i127 = pow(curveGain, g127 - 127) * g127;
+  return (127.0 - minOutput) / (127) * i * 127 / i127 + minOutput * sgn(input);
+}
+Chassis::Chassis(Drivetrain& drivetrain, OdomSensors& sensors, OPCurve *throttleCurve, OPCurve *steerCurve)
     : drivetrain(drivetrain), sensors(sensors), throttleCurve(throttleCurve), steerCurve(steerCurve) {}
-    
 void calibrateIMU(OdomSensors &sensors) {
   int attempt = 1;
   bool calibrated = false;

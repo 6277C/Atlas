@@ -1,14 +1,19 @@
 #pragma once
 
 namespace atlas {
-class ExitConditions {
+class ExitCondition {
 public:
-  float settleError = 0;
-  float settleTime = 0;
-  float timeout = 0;
-  float time_spent_settled = 0;
-  float time_spent_running = 0;
+  ExitCondition(const float range, const int time);
+  bool getExit();
+  bool compute(const float input);
+  void reset();
+protected:
+  const float range;
+  const int time;
+  int startTime = -1;
+  bool done = false;
 
-  bool isSettled();
 };
+
+extern ExitCondition relativeAngularExit;
 } // namespace atlas

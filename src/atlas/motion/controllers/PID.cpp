@@ -1,4 +1,5 @@
 #include "atlas/motion/controllers/PID.hpp"
+#include "atlas/config/constants.hpp"
 #include "atlas/util.hpp"
 #include "pros/rtos.hpp"
 #include <cmath>
@@ -35,8 +36,21 @@ void PID::setSignFlipReset(bool signFlipReset) { signFlipReset = signFlipReset; 
 
 bool PID::getSignFlipReset() { return signFlipReset; }
 
-void PID::reset(){
+ void PID::setConstants(const PIDConstants& constants) {
+        kP = constants.kP;
+        kI = constants.kI;
+        kD = constants.kD;
+        antiWindup = constants.antiWindup;
+    }
+
+void PID::reset() {
   integral = 0;
   prevError = 0;
 }
+
+PID angularPID(globalAngularParams.kP, globalAngularParams.kI, globalAngularParams.kD,
+               globalAngularParams.antiWindup);
+
+PID linearPID(globalLinearParams.kP, globalLinearParams.kI, globalLinearParams.kD,
+              globalLinearParams.antiWindup);
 } // namespace atlas

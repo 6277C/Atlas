@@ -1,4 +1,6 @@
 #pragma once
+#include "atlas/config/chassis.hpp"
+#include "atlas/localization/pose.hpp"
 #include "pros/imu.hpp"
 #include "pros/motor_group.hpp"
 #include "pros/rotation.hpp"
@@ -18,7 +20,7 @@ const float OLD_4 = 4.18;
 const float NEW_4_HALF = 3.995;
 const float OLD_4_HALF = 4.175;
 } // namespace Omniwheel
-
+class Drivetrain;
 class TrackingWheel {
 public:
   /**
@@ -63,4 +65,13 @@ class OdomSensors{
         TrackingWheel* horizontal2;
         pros::Imu* imu;
 };
-}
+
+void setSensors(OdomSensors& sensors, Drivetrain& drivetrain); // set dt sensors
+Pose getPose(bool radians = false);
+void setPose(Pose pose, bool radians = false);
+Pose getSpeed(bool radians = false);
+Pose getLocalSpeed(bool radians = false);
+Pose estimatePose(float time, bool radians = false); //estimate pose after certain time
+void update(); // update pose
+void init();
+} // namespace atlas

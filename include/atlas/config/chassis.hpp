@@ -1,10 +1,7 @@
 #pragma once
-#include "atlas/config/drivetrain.hpp"
-#include "atlas/config/opcurve.hpp"
-#include "atlas/localization/odom/setup.hpp"
+#include "atlas/localization/odom.hpp"
 #include "atlas/localization/pose.hpp"
-#include "atlas/motion/controllers/PID.hpp"
-#include "pros/motors.h"
+#include "pros/motor_group.hpp"
 
 namespace atlas {
 enum class AngularDirection {
@@ -16,16 +13,6 @@ enum class DriveSide {
   LEFT, // lock left side
   RIGHT // lock right side
 };
-struct TurnToHeadingParams {
-  /** the direction the robot should turn in. AUTO by default */
-  AngularDirection direction = AngularDirection::AUTO;
-  /** the maximum speed the robot can turn at. Value between 0-127. 127 by default */
-  int maxSpeed = 127;
-  // min speed to move to next task
-  int chainSpeed = 0;
-  // max error to move to next task
-  float chainError = 0;
-};
 struct SwingToHeadingParams {
     /** the direction the robot should turn in. AUTO by default */
   AngularDirection direction = AngularDirection::AUTO;
@@ -36,9 +23,63 @@ struct SwingToHeadingParams {
   // max error to move to next task
   float chainError = 0;
 };
+  struct TurnToHeadingParams {
+  /** the direction the robot should turn in. AUTO by default */
+  AngularDirection direction = AngularDirection::AUTO;
+  /** the maximum speed the robot can turn at. Value between 0-127. 127 by default */
+  int maxSpeed = 127;
+  // min speed to move to next task
+  int chainSpeed = 0;
+  // max error to move to next task
+  float chainError = 0;
+};
+/**
+* Drivetrain constuctor for the physical traits of the drivetrain
+*/
+
+class OdomSensors;
+class OPCurve {
+public:
+  // virtual process of a input and output
+  virtual float curve(float input) = 0;
+};
+
+// see https://www.desmos.com/calculator/umicbymbnl for an interactive graph
+class ExpoOPCurve : public OPCurve {
+public:
+  ExpoOPCurve(float deadband, float minOutput, float curve);
+  // curve an input
+  float curve(float input);
+
+private:
+  const float deadband = 0;
+  const float minOutput = 0;
+  const float curveGain = 1;
+};
+
+class Drivetrain {
+public:
+  float wheelDiameter;
+  float rpm;
+  float trackWidth;
+  float horizontalDrift;
+  pros::MotorGroup *leftMotors;
+  pros::MotorGroup *rightMotors;
+  Drivetrain(pros::MotorGroup *leftMotors, pros::MotorGroup *rightMotors, float trackWidth, float wheelDiameter,
+             float rpm, float horizontalDrift);
+};
 class Chassis {
 public:
-  Chassis(Drivetrain drivetrain, OdomSensors sensors, DriveCurve *throttleCurve, DriveCurve *steerCurve);
+  // global constants
+  float turnKP;
+  float turnKI;
+  float turnKD;
+  float turnAntiWindup;
+
+  void setTurnConstants(float turnKP, float turnKI, float turnKD, float turnAntiWindup);
+
+  // chassis structure
+  Chassis(Drivetrain& drivetrain, OdomSensors& sensors, OPCurve *throttleCurve, OPCurve *steerCurve);
   // calibrate the drivetrain sensors
   void calibrate(bool calibrateIMU = true);
   // sets position of the chassis
@@ -59,10 +100,10 @@ public:
   void swingToAngle(float angle, DriveSide lockedSide, int timeout, SwingToHeadingParams params = {});
 
 private:
-  Drivetrain drivetrain;
-  OdomSensors sensors;
-  DriveCurve *throttleCurve;
-  DriveCurve *steerCurve;
+  Drivetrain& drivetrain;
+  OdomSensors& sensors;
+  OPCurve *throttleCurve;
+  OPCurve *steerCurve;
   float distTraveled = 0;
 };
 } // namespace atlas
