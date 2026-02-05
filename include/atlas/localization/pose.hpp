@@ -1,7 +1,5 @@
 #pragma once
 
-#include <string>
-
 namespace atlas {
 class Pose {
     public:
@@ -9,6 +7,7 @@ class Pose {
         float y;
         float angle;
 
+        Pose() : x(0), y(0), angle(0) {}
         // create unitless pose
         Pose(float x, float y, float angle = 0);
         // addition

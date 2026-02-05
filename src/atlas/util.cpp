@@ -1,7 +1,5 @@
 #include <vector>
 #include "atlas/util.hpp"
-#include "pros/abstract_motor.hpp"
-#include "pros/motors.h"
 #include "pros/rtos.hpp"
 
 namespace atlas {

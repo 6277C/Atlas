@@ -1,8 +1,6 @@
 #pragma once
 
 #include "config/chassis.hpp"
-#include "pros/abstract_motor.hpp"
-#include "pros/motors.h"
 #include <cstdint>
 #include <math.h>
 #include <vector>
