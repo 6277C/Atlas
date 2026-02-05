@@ -1,3 +1,4 @@
+#include "atlas/config/chassis.hpp"
 #include "atlas/config/constants.hpp"
 #include "atlas/localization/odom.hpp"
 #include "atlas/motion/controllers/PID.hpp"
@@ -5,11 +6,20 @@
 #include "atlas/util.hpp"
 #include "pros/rtos.hpp"
 #include <cmath>
-#include <optional>
-
 namespace atlas {
 
-void Chassis::turnToAngle(float angle, int timeout, TurnToHeadingParams params) {
+void Chassis::turnToAngle(float angle, int timeout, TurnToAngleParams params, bool async) {
+
+  this-> requestMotionStart();
+
+  if(!this->motionRunning) return;
+
+  if(async){
+    pros::Task task ([&](){turnToAngle(angle, timeout, params, false);});
+    this-> endMotion();
+    pros::delay(10);
+    return;
+  }
 
   float targetAngle = angle;
   float deltaAngle;

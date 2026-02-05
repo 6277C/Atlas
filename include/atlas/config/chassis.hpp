@@ -2,6 +2,7 @@
 #include "atlas/localization/odom.hpp"
 #include "atlas/localization/pose.hpp"
 #include "pros/motor_group.hpp"
+#include "pros/rtos.hpp"
 
 namespace atlas {
 enum class AngularDirection {
@@ -14,16 +15,6 @@ enum class DriveSide {
   RIGHT // lock right side
 };
 struct SwingToHeadingParams {
-    /** the direction the robot should turn in. AUTO by default */
-  AngularDirection direction = AngularDirection::AUTO;
-  /** the maximum speed the robot can turn at. Value between 0-127. 127 by default */
-  int maxSpeed = 127;
-  // min speed to move to next task
-  int chainSpeed = 0;
-  // max error to move to next task
-  float chainError = 0;
-};
-  struct TurnToHeadingParams {
   /** the direction the robot should turn in. AUTO by default */
   AngularDirection direction = AngularDirection::AUTO;
   /** the maximum speed the robot can turn at. Value between 0-127. 127 by default */
@@ -33,9 +24,29 @@ struct SwingToHeadingParams {
   // max error to move to next task
   float chainError = 0;
 };
+struct TurnToAngleParams {
+  /** the direction the robot should turn in. AUTO by default */
+  AngularDirection direction = AngularDirection::AUTO;
+  /** the maximum speed the robot can turn at. Value between 0-127. 127 by default */
+  int maxSpeed = 127;
+  // min speed to move to next task
+  int chainSpeed = 0;
+  // max error to move to next task
+  float chainError = 0;
+};
+
+struct DriveDistanceParams {
+  int maxSpeed = 100;
+  // min speed to chain
+  int chainSpeed = 0;
+  // max error to chain
+  float chainError = 0;
+  // acceleration time
+  float timeToMaxSpeed = 10;
+};
 /**
-* Drivetrain constuctor for the physical traits of the drivetrain
-*/
+ * Drivetrain constuctor for the physical traits of the drivetrain
+ */
 
 class OdomSensors;
 class OPCurve {
@@ -79,7 +90,7 @@ public:
   void setTurnConstants(float turnKP, float turnKI, float turnKD, float turnAntiWindup);
 
   // chassis structure
-  Chassis(Drivetrain& drivetrain, OdomSensors& sensors, OPCurve *throttleCurve, OPCurve *steerCurve);
+  Chassis(Drivetrain &drivetrain, OdomSensors &sensors, OPCurve *throttleCurve, OPCurve *steerCurve);
   // calibrate the drivetrain sensors
   void calibrate(bool calibrateIMU = true);
   // sets position of the chassis
@@ -92,18 +103,29 @@ public:
   void waitUntil(float dist);
   // wait until chassis has completed it's movement
   void waitUntilDone();
+  void cancelMotion();
+  void cancelAllMotions();
+  bool isInMotion() const;
   // sets chassis brake mode
   void setBrakeMode(pros::motor_brake_mode_e mode);
   // turn to angle
-  void turnToAngle(float angle, int timeout, TurnToHeadingParams params = {});
+  void turnToAngle(float angle, int timeout, TurnToAngleParams params = {}, bool async = true);
+  // drive 1 dimensional distanct
+  void driveDistance(float distance, float angle, int timeout, DriveDistanceParams params = {}, bool async = true);
   // swing to ange
   void swingToAngle(float angle, DriveSide lockedSide, int timeout, SwingToHeadingParams params = {});
 
-private:
-  Drivetrain& drivetrain;
-  OdomSensors& sensors;
+protected:
+  void requestMotionStart();
+  void endMotion();
+  bool motionRunning = false;
+  bool motionQueued = false;
+  Drivetrain &drivetrain;
+  OdomSensors &sensors;
   OPCurve *throttleCurve;
   OPCurve *steerCurve;
   float distTraveled = 0;
+private:
+  pros::Mutex mutex;
 };
 } // namespace atlas

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "config/chassis.hpp"
+#include "pros/abstract_motor.hpp"
+#include "pros/motors.h"
 #include <cstdint>
 #include <math.h>
 #include <vector>
@@ -12,7 +14,10 @@ namespace atlas {
     float angleError(float target, float position, bool radians = true,
                  AngularDirection direction = AngularDirection::AUTO);
     constexpr float sanitizeAngle(float angle, bool radians = true);
-    
+    double linearToRPM(double linearVel,
+                   double wheelDiameter,
+                   double gearRatio,
+                   double maxRPM = 600.0);    
     class Timer{
         public:
         Timer(uint32_t time);

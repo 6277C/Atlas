@@ -16,4 +16,5 @@ protected:
 };
 
 extern ExitCondition relativeAngularExit;
+extern ExitCondition relativeLinearExit;
 } // namespace atlas

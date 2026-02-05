@@ -1,5 +1,7 @@
 #include <vector>
 #include "atlas/util.hpp"
+#include "pros/abstract_motor.hpp"
+#include "pros/motors.h"
 #include "pros/rtos.hpp"
 
 namespace atlas {
@@ -95,5 +97,15 @@ void Timer::resume() {
 void Timer::waitUntilDone() {
     do pros::delay(5);
     while (!this->isDone());
+}
+
+double linearToRPM(double linearVel,
+                   double wheelDiameter,
+                   double gearRatio,
+                   double maxRPM) {
+  double rpm =
+      (linearVel * 60.0 / (M_PI * wheelDiameter)) * gearRatio;
+
+  return std::clamp(rpm, -maxRPM, maxRPM);
 }
 }

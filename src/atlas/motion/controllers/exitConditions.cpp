@@ -22,4 +22,5 @@ void ExitCondition::reset() {
 } 
 
 ExitCondition relativeAngularExit(1, 100);
+ExitCondition relativeLinearExit(1, 100);
 } // namespace atlas
