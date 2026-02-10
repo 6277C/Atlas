@@ -3,6 +3,8 @@
 #include "atlas/localization/pose.hpp"
 #include "atlas/util.hpp"
 #include "pros/imu.hpp"
+#include <math.h>
+#include "pros/rtos.hpp"
 
 atlas::OdomSensors::OdomSensors(TrackingWheel *vertical1, TrackingWheel *vertical2, TrackingWheel *horizontal1,
                                 TrackingWheel *horizontal2, pros::Imu *imu) {
@@ -145,7 +147,6 @@ atlas::Pose atlas::estimatePose(float time, bool radians) {
 }
 
 void atlas::update() {
-  // TODO: add particle filter
   // get the current sensor values
   float vertical1Raw = 0;
   float vertical2Raw = 0;
@@ -161,7 +162,7 @@ void atlas::update() {
   if (odomSensors.horizontal2 != nullptr)
     horizontal2Raw = odomSensors.horizontal2->getDist();
   if (odomSensors.imu != nullptr)
-    imuRaw = degToRad(odomSensors.imu->get_rotation());
+    imuRaw = degToRad(odomSensors.imu->get_rotation()); 
 
   // calculate the change in sensor values
   float deltaVertical1 = vertical1Raw - prevVertical1;
@@ -254,24 +255,24 @@ void atlas::update() {
   atlas::Pose prevPose = odomPose;
 
   // calculate global x and y
-  odomPose.x += localY * sin(avgHeading);
+  odomPose.x += localY * -sin(avgHeading);
   odomPose.y += localY * cos(avgHeading);
-  odomPose.x += localX * -cos(avgHeading);
+  odomPose.x += localX * cos(avgHeading);
   odomPose.y += localX * sin(avgHeading);
   odomPose.angle = heading;
 
   // calculate speed
-  odomSpeed.x = fma((odomPose.x - prevPose.x) / 0.01, odomSpeed.x, 0.95);
-  odomSpeed.y = fma((odomPose.y - prevPose.y) / 0.01, odomSpeed.y, 0.95);
-  odomSpeed.angle = fma((odomPose.angle - prevPose.angle) / 0.01, odomSpeed.angle, 0.95);
+   odomSpeed.x = ema((odomPose.x - prevPose.x) / 0.01, odomSpeed.x, 0.95);
+  odomSpeed.y = ema((odomPose.y - prevPose.y) / 0.01, odomSpeed.y, 0.95);
+  odomSpeed.angle = ema((odomPose.angle - prevPose.angle) / 0.01, odomSpeed.angle, 0.95);
 
   // calculate local speed
-  odomLocalSpeed.x = fma(localX / 0.01, odomLocalSpeed.x, 0.95);
-  odomLocalSpeed.y = fma(localY / 0.01, odomLocalSpeed.y, 0.95);
-  odomLocalSpeed.angle = fma(deltaHeading / 0.01, odomLocalSpeed.angle, 0.95);
+  odomLocalSpeed.x = ema(localX / 0.01, odomLocalSpeed.x, 0.95);
+  odomLocalSpeed.y = ema(localY / 0.01, odomLocalSpeed.y, 0.95);
+  odomLocalSpeed.angle = ema(deltaHeading / 0.01, odomLocalSpeed.angle, 0.95);
 }
 
-void atlas::init() {
+void atlas::initOdom() {
   if (odomTask == nullptr) {
     odomTask = new pros::Task{[=] {
       while (true) {

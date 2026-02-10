@@ -75,7 +75,7 @@ void Chassis::calibrate(bool calibrateImu) {
   if (sensors.horizontal2 != nullptr)
     sensors.horizontal2->reset();
   setSensors(sensors, drivetrain);
-  init();
+  initOdom();
   // rumble to controller to indicate success
   pros::c::controller_rumble(pros::E_CONTROLLER_MASTER, ".");
 }
@@ -85,7 +85,7 @@ void Chassis::setPose(float x, float y, float angle) { setPose(Pose(x, y, angle)
 void Chassis::setPose(Pose pose) { setPose(pose); }
 
 Pose Chassis::getPose() {
-  Pose pose = atlas::getPose(true);
+  Pose pose = atlas::getPose(false);
   return pose;
 }
 

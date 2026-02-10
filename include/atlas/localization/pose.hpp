@@ -12,8 +12,10 @@ class Pose {
         Pose(float x, float y, float angle = 0);
         // addition
         Pose operator+(const Pose& other) const;
+        Pose addWithAngle(const Pose& other) const;
         // subtraction
         Pose operator-(const Pose& other) const;
+        Pose minusWithAngle(const Pose& other) const;
         // division
         Pose operator/(const float& other) const;
         // multiplication

@@ -73,5 +73,5 @@ Pose getSpeed(bool radians = false);
 Pose getLocalSpeed(bool radians = false);
 Pose estimatePose(float time, bool radians = false); //estimate pose after certain time
 void update(); // update pose
-void init();
+void initOdom();
 } // namespace atlas

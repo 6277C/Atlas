@@ -15,6 +15,10 @@ constexpr float sanitizeAngle(float angle, bool radians) {
     else return std::fmod(std::fmod(angle, 360) + 360, 360);
 }
 
+float wrapAngleRad(float angle) {
+    return std::remainder(angle, 2.0f * M_PI);
+}
+
 float angleError(float target, float position, bool radians, AngularDirection direction) {
     // bound angles from 0 to 2pi or 0 to 360
     target = sanitizeAngle(target, radians);
@@ -29,6 +33,9 @@ float angleError(float target, float position, bool radians, AngularDirection di
         default: // choose the shortest path
             return std::remainder(rawError, max);
     }
+}
+float ema(float current, float previous, float smooth) {
+    return (current * smooth) + (previous * (1 - smooth));
 }
 
 Timer::Timer(uint32_t time)

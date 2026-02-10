@@ -9,6 +9,7 @@ namespace atlas {
     template <typename T> constexpr T sgn(T value) { return value < 0 ? -1 : 1; }
     constexpr float radToDeg(float rad) { return rad * 180 / M_PI; }
     constexpr float degToRad(float deg) { return deg * M_PI / 180; }
+    float wrapAngleRad(float angle);
     float angleError(float target, float position, bool radians = true,
                  AngularDirection direction = AngularDirection::AUTO);
     constexpr float sanitizeAngle(float angle, bool radians = true);
@@ -16,6 +17,7 @@ namespace atlas {
                    double wheelDiameter,
                    double gearRatio,
                    double maxRPM = 600.0);    
+    float ema(float current, float previous, float smooth);
     class Timer{
         public:
         Timer(uint32_t time);

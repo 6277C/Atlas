@@ -9,6 +9,8 @@ struct PIDConstants {
 
 struct AMCLConfig {
   int numParticles; // number of particles
+  int distRefresh; // ms between distance sensor updates
+  int GPSRefresh; // ms between gps updates
 
   // Motion model noise
   float odomSigmaXY; // amount of noise in inches
@@ -20,8 +22,11 @@ struct AMCLConfig {
 
   // Resampling
   float resampleThreshold;
+  float gpsEnableThresh;
+  float gpsDisableThresh;
 };
 extern PIDConstants relativeAngularParams;
 extern PIDConstants relativeLinearParams;
 extern PIDConstants globalAngularParams;
 extern PIDConstants globalLinearParams;
+extern AMCLConfig amclConfig;   // ⭐ THIS WAS MISSING
